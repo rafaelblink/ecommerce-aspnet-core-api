@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HPlusSport.Classes;
 using HPlusSport.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,16 +24,43 @@ namespace HPlusSport.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllProducts()
+        public async Task<IActionResult> GetAllProducts([FromQuery] ProductQueryParameters queryParameters)
         {
-            var products = _context.Products.Include(p => p.Category).ToArrayAsync();
-            return Ok(await products);
+            IQueryable<Product> products = _context.Products;
+
+            if (queryParameters.MinPrice != null && queryParameters.MaxPrice != null)
+            {
+                products = products
+                .Where(p =>
+                p.Price >= queryParameters.MinPrice.Value &&
+                p.Price <= queryParameters.MaxPrice.Value);
+            }
+
+            if (!string.IsNullOrEmpty(queryParameters.Sku))
+                products = products.Where(p => p.Sku == queryParameters.Sku);
+
+
+            if (!string.IsNullOrEmpty(queryParameters.Name))
+                products = products.Where(p => p.Name.ToLower().Contains(queryParameters.Name.ToLower()));
+
+
+            products = products
+            .Skip(queryParameters.Size * (queryParameters.Page - 1))
+            .Take(queryParameters.Size);
+
+            if(!string.IsNullOrEmpty(queryParameters.SortBy)) 
+            {
+                products = products.OrderBy(c => c.Price);
+            }
+
+            return Ok(await products.ToArrayAsync());
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetProduct(int id) {
+        public async Task<IActionResult> GetProduct(int id)
+        {
             var product = _context.Products.FindAsync(id);
-            if(product == null) return NotFound(); 
+            if (product == null) return NotFound();
             return Ok(await product);
         }
     }

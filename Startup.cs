@@ -28,7 +28,7 @@ namespace HPlusSport
         public void ConfigureServices(IServiceCollection services)
         {
             var connstr = Environment.GetEnvironmentVariable("PROJ");
-            
+
             services.AddControllers();
             services.AddDbContext<ProjectContext>(options => options.UseMySql(connstr));
         }
