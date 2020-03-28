@@ -29,7 +29,10 @@ namespace HPlusSport
         {
             var connstr = Environment.GetEnvironmentVariable("PROJ");
 
-            services.AddControllers();
+            services.AddControllers().ConfigureApiBehaviorOptions(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
             services.AddDbContext<ProjectContext>(options => options.UseMySql(connstr));
         }
 

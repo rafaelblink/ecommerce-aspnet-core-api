@@ -15,12 +15,6 @@ namespace HPlusSport.Models
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Product>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Name).IsRequired();
-            });
-
             modelBuilder.Entity<Category>(entity =>
             {
                 entity.HasMany(c => c.Products).WithOne(a => a.Category);

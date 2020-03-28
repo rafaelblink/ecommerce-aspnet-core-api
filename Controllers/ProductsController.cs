@@ -48,12 +48,12 @@ namespace HPlusSport.Controllers
             .Skip(queryParameters.Size * (queryParameters.Page - 1))
             .Take(queryParameters.Size);
 
-            if(!string.IsNullOrEmpty(queryParameters.SortBy)) 
+            if (!string.IsNullOrEmpty(queryParameters.SortBy))
             {
                 products = products.OrderBy(c => c.Price);
             }
 
-            return Ok(await products.ToArrayAsync());
+            return Ok(await products.Include(c => c.Category).ToArrayAsync());
         }
 
         [HttpGet("{id:int}")]
@@ -62,6 +62,19 @@ namespace HPlusSport.Controllers
             var product = _context.Products.FindAsync(id);
             if (product == null) return NotFound();
             return Ok(await product);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostProduct(Product product)
+        {
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(
+                "GetProduct",
+                new { id = product.Id },
+                product
+            );
         }
     }
 }
