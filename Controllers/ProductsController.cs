@@ -9,7 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace HPlusSport.Controllers
-{
+{   
+    [ApiVersion("1.0")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase
