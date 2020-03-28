@@ -20,7 +20,6 @@ namespace HPlusSport.Controllers
         public ProductsController(ProjectContext context)
         {
             _context = context;
-
             _context.Database.EnsureCreated();
         }
 
@@ -72,10 +71,45 @@ namespace HPlusSport.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(
-                "GetProduct",
+                nameof(GetProduct),
                 new { id = product.Id },
                 product
             );
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> PutProduct([FromRoute] int id, [FromBody] Product product) 
+        {
+            if(id != product.Id) {
+                return BadRequest();
+            }
+            _context.Entry(product).State = EntityState.Modified;
+            try
+            {
+                await _context.SaveChangesAsync();                
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if(_context.Products.Find(id) == null) {
+                    return NotFound();
+                } else {
+                    throw;
+                }
+            }
+            return NoContent();
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult<Product>> DeleteProduct([FromRoute] int id) {
+            var product = await _context.Products.FindAsync(id);
+
+            if(product == null) return NotFound();
+
+            _context.Products.Remove(product);
+
+            await _context.SaveChangesAsync();
+
+            return product;
         }
     }
 }
