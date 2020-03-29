@@ -37,9 +37,10 @@ namespace HPlusSport
             });
             services.AddDbContext<ProjectContext>(options => options.UseMySql(connstr));
 
-            services.AddApiVersioning(options => {
+            services.AddApiVersioning(options =>
+            {
                 options.ReportApiVersions = true;
-                options.DefaultApiVersion = new ApiVersion(1,0);
+                options.DefaultApiVersion = new ApiVersion(1, 0);
                 options.AssumeDefaultVersionWhenUnspecified = true;
                 //It's for you pass the header X-API-Version on request.
                 options.ApiVersionReader = new HeaderApiVersionReader("X-API-Version");
@@ -49,6 +50,14 @@ namespace HPlusSport
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "HPlus Sport", Version = "v1" });
+            });
+            // Enabling CORS.
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins("*").AllowAnyOrigin();
+                });
             });
         }
 
@@ -60,7 +69,9 @@ namespace HPlusSport
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            app.UseHsts();
+
+            app.UseCors();
 
             app.UseRouting();
 
