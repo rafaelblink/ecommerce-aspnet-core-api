@@ -7,20 +7,24 @@ using HPlusSport.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace HPlusSport.Controllers
-{   
+{
     [ApiVersion("1.0")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
         private readonly ProjectContext _context;
+        private readonly ILogger _logger;
 
-        public ProductsController(ProjectContext context)
+        public ProductsController(ProjectContext context, ILogger<ProductsController> logger)
         {
             _context = context;
             _context.Database.EnsureCreated();
+            _logger = logger;
         }
 
         [HttpGet]
@@ -61,6 +65,8 @@ namespace HPlusSport.Controllers
         {
             var product = _context.Products.FindAsync(id);
             if (product == null) return NotFound();
+            _logger.LogInformation("Getting Product: {prod}", JsonConvert.SerializeObject(product));
+
             return Ok(await product);
         }
 
@@ -78,21 +84,25 @@ namespace HPlusSport.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> PutProduct([FromRoute] int id, [FromBody] Product product) 
+        public async Task<IActionResult> PutProduct([FromRoute] int id, [FromBody] Product product)
         {
-            if(id != product.Id) {
+            if (id != product.Id)
+            {
                 return BadRequest();
             }
             _context.Entry(product).State = EntityState.Modified;
             try
             {
-                await _context.SaveChangesAsync();                
+                await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if(_context.Products.Find(id) == null) {
+                if (_context.Products.Find(id) == null)
+                {
                     return NotFound();
-                } else {
+                }
+                else
+                {
                     throw;
                 }
             }
@@ -100,10 +110,11 @@ namespace HPlusSport.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<ActionResult<Product>> DeleteProduct([FromRoute] int id) {
+        public async Task<ActionResult<Product>> DeleteProduct([FromRoute] int id)
+        {
             var product = await _context.Products.FindAsync(id);
 
-            if(product == null) return NotFound();
+            if (product == null) return NotFound();
 
             _context.Products.Remove(product);
 
